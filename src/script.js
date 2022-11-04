@@ -63,6 +63,10 @@ const material_platform = new THREE.MeshBasicMaterial();
 material_platform.color = new THREE.Color(0xd4ffdc);
 material_platform.opacity = 0.0;
 
+const material_special_platform = new THREE.MeshBasicMaterial();
+material_special_platform.color = new THREE.Color(0xffbb00);
+material_special_platform.opacity = 0.0;
+
 // Objects
 const player = new THREE.BoxGeometry(1, 1, 1);
 const platform = new THREE.BoxGeometry(1.5, 0.2, 1.5);
@@ -84,7 +88,9 @@ for (let i = 0; i < positions.length; i++) {
   scene.add(mesh_platform);
   platform_meshes.push(mesh_platform);
 }
+
 const special_platforms = [1, 3];
+var special_platform_meshes = [];
 var section_materials = [];
 var section_meshes = [];
 for (let i = 0; i < special_platforms.length; i++) {
@@ -102,6 +108,20 @@ for (let i = 0; i < special_platforms.length; i++) {
   mesh_section.rotateY(viewAngle);
   scene.add(mesh_section);
   section_meshes.push(mesh_section);
+
+  const mesh_special_platform = new THREE.Mesh(
+    platform,
+    material_special_platform
+  );
+  mesh_special_platform.position.x =
+    platform_meshes[special_platforms[i]].position.x - gap;
+  mesh_special_platform.position.y =
+    platform_meshes[special_platforms[i]].position.y;
+  mesh_special_platform.position.z =
+    platform_meshes[special_platforms[i]].position.z - gap;
+  mesh_special_platform.rotateY(viewAngle);
+  scene.add(mesh_special_platform);
+  special_platform_meshes.push(mesh_special_platform);
 }
 
 // Beginning Animation
@@ -124,7 +144,19 @@ for (let i = 0; i < platform_meshes.length; i++) {
     y: -0.6,
   });
 }
+for (let i = 0; i < special_platform_meshes.length; i++) {
+  gsap.to(special_platform_meshes[i].position, {
+    duration: 1 + i * 0.5,
+    ease: "power2",
+    y: -0.6,
+  });
+}
 gsap.to(material_platform, {
+  duration: 2,
+  ease: "power2",
+  opacity: 1.0,
+});
+gsap.to(material_special_platform, {
   duration: 2,
   ease: "power2",
   opacity: 1.0,
