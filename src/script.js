@@ -63,10 +63,6 @@ const material_platform = new THREE.MeshBasicMaterial();
 material_platform.color = new THREE.Color(0xd4ffdc);
 material_platform.opacity = 0.0;
 
-const material_section = new THREE.MeshBasicMaterial();
-material_section.color = new THREE.Color(0xff0000);
-material_section.opacity = 0.0;
-
 // Objects
 const player = new THREE.BoxGeometry(1, 1, 1);
 const platform = new THREE.BoxGeometry(1.5, 0.2, 1.5);
@@ -88,13 +84,25 @@ for (let i = 0; i < positions.length; i++) {
   scene.add(mesh_platform);
   platform_meshes.push(mesh_platform);
 }
+const special_platforms = [1, 3];
+var section_materials = [];
+var section_meshes = [];
+for (let i = 0; i < special_platforms.length; i++) {
+  const material_section = new THREE.MeshBasicMaterial();
+  material_section.color = new THREE.Color(0xff0000);
+  material_section.opacity = 0.0;
+  section_materials.push(material_section);
 
-const mesh_section1 = new THREE.Mesh(section1, material_section);
-mesh_section1.position.x = platform_meshes[1].position.x - 3;
-mesh_section1.position.y = platform_meshes[1].position.y;
-mesh_section1.position.z = platform_meshes[1].position.z - 3;
-mesh_section1.rotateY(viewAngle);
-scene.add(mesh_section1);
+  const mesh_section = new THREE.Mesh(section1, material_section);
+  mesh_section.position.x =
+    platform_meshes[special_platforms[i]].position.x - 3;
+  mesh_section.position.y = platform_meshes[special_platforms[i]].position.y;
+  mesh_section.position.z =
+    platform_meshes[special_platforms[i]].position.z - 3;
+  mesh_section.rotateY(viewAngle);
+  scene.add(mesh_section);
+  section_meshes.push(mesh_section);
+}
 
 // Beginning Animation
 // player
@@ -159,17 +167,19 @@ function onDocumentKeyDown(event) {
   }
 
   // Show Titles if player is on certain platforms
-  if (currentPosition == 1) {
-    gsap.to(mesh_section1.position, {
-      duration: 1,
-      ease: "power2",
-      y: 1,
-    });
-    gsap.to(material_section, {
-      duration: 1,
-      ease: "power2",
-      opacity: 1.0,
-    });
+  for (let i = 0; i < special_platforms.length; i++) {
+    if (currentPosition == special_platforms[i]) {
+      gsap.to(section_meshes[i].position, {
+        duration: 1,
+        ease: "power2",
+        y: 1,
+      });
+      gsap.to(section_materials[i], {
+        duration: 1,
+        ease: "power2",
+        opacity: 1.0,
+      });
+    }
   }
 }
 
