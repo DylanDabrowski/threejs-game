@@ -5,6 +5,7 @@ import * as dat from "dat.gui";
 import { gsap } from "gsap";
 import { TimelineMax } from "gsap/gsap-core";
 import { Timeline } from "gsap/gsap-core";
+import { Vector3 } from "three";
 
 const viewAngle = 0.8;
 const cameraLookAt = 0;
@@ -21,9 +22,15 @@ const scene = new THREE.Scene();
 // Objects
 const player = new THREE.BoxGeometry(1, 1, 1);
 const platform = new THREE.BoxGeometry(1.2, 0.2, 1.2);
+var positions = [
+  new Vector3(0, 0, 0),
+  new Vector3(1.2, 0, -1.2),
+  new Vector3(2.4, 0, -2.4),
+  new Vector3(3.6, 0, -3.6),
+];
+var currentPosition = 0;
 
 // Materials
-
 const material_player = new THREE.MeshBasicMaterial();
 material_player.color = new THREE.Color(0x00ff00);
 
@@ -35,16 +42,13 @@ const mesh_player = new THREE.Mesh(player, material_player);
 scene.add(mesh_player);
 mesh_player.rotateY(viewAngle);
 
-var platformPositionOffset = 0;
-for (let i = 0; i < 4; i++) {
+for (let i = 0; i < positions.length; i++) {
   const mesh_platform = new THREE.Mesh(platform, material_platform);
   scene.add(mesh_platform);
-  mesh_platform.position.x = platformPositionOffset;
-  mesh_platform.position.z = -platformPositionOffset;
+  mesh_platform.position.x = positions[i].x;
+  mesh_platform.position.z = positions[i].z;
   mesh_platform.rotateY(viewAngle);
   mesh_platform.position.y = -0.5;
-
-  platformPositionOffset += 1.2;
 }
 
 // Lights
@@ -106,61 +110,58 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-/**
- * Animate
- */
-
-var newX = 0;
-var newZ = 0;
-var playerAnimation = gsap.to(mesh_player.position, {
-  duration: 1,
-  x: newX,
-  z: newZ,
-});
-
-const clock = new THREE.Clock();
-
 // Key Listeners
 document.addEventListener("keydown", onDocumentKeyDown, false);
 function onDocumentKeyDown(event) {
-  if (!playerAnimation.isActive) {
-    var keyCode = event.which;
-    if (keyCode == 87) {
-      // w
-      console.log("up");
-    } else if (keyCode == 83) {
-      // s
-      console.log("down");
-    } else if (keyCode == 65) {
-      // a
-      console.log("left");
-    } else if (keyCode == 68) {
-      // d
-      console.log("right");
-    } else if (keyCode == 32) {
-      // space
-      console.log("space");
-      var getMeshPos = new THREE.Vector3();
-      getMeshPos.getPositionFromMatrix(mesh_player.matrixWorld);
-      newX = getMeshPos.x;
-      newZ = getMeshPos.z;
-      playerAnimation;
-    } else if (keyCode == 8) {
-      // backspace
-      console.log("backspace");
+  var keyCode = event.which;
+  if (keyCode == 87) {
+    // w
+    console.log("up");
+  } else if (keyCode == 83) {
+    // s
+    console.log("down");
+  } else if (keyCode == 65) {
+    // a
+    console.log("left");
+  } else if (keyCode == 68) {
+    // d
+    console.log("right");
+  } else if (keyCode == 32) {
+    // space
+    console.log("space");
+    if (currentPosition < positions.length) {
+      currentPosition += 1;
+      gsap.to(mesh_player.position, {
+        duration: 1,
+        x: positions[currentPosition].x,
+        z: positions[currentPosition].z,
+      });
+      gsap.to(camera.position, {
+        duration: 1,
+        x: positions[currentPosition].x,
+        z: positions[currentPosition].z + 2,
+      });
+    }
+  } else if (keyCode == 8) {
+    // backspace
+    console.log("backspace");
+    if (currentPosition >= 0) {
+      currentPosition -= 1;
+      gsap.to(mesh_player.position, {
+        duration: 1,
+        x: positions[currentPosition].x,
+        z: positions[currentPosition].z,
+      });
+      gsap.to(camera.position, {
+        duration: 1,
+        x: positions[currentPosition].x,
+        z: positions[currentPosition].z + 2,
+      });
     }
   }
 }
 
 const tick = () => {
-  const elapsedTime = clock.getElapsedTime();
-
-  // Update objects
-  // sphere.rotation.y = .5 * elapsedTime
-
-  // Update Orbital Controls
-  // controls.update()
-
   // Render
   renderer.render(scene, camera);
 
