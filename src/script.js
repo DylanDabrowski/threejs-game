@@ -3,6 +3,9 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import * as dat from 'dat.gui'
 
+const viewAngle = 0.8;
+const cameraLookAt = 0;
+
 // Debug
 const gui = new dat.GUI()
 
@@ -13,16 +16,33 @@ const canvas = document.querySelector('canvas.webgl')
 const scene = new THREE.Scene()
 
 // Objects
-const geometry = new THREE.BoxGeometry(1, 1, 1);
+const player = new THREE.BoxGeometry(1, 1, 1);
+const platform = new THREE.BoxGeometry(1.2, 0.2, 1.2);
 
 // Materials
 
-const material = new THREE.MeshBasicMaterial()
-material.color = new THREE.Color(0xff0000)
+const material_player = new THREE.MeshBasicMaterial()
+material_player.color = new THREE.Color(0x00ff00)
+
+const material_platform = new THREE.MeshBasicMaterial()
+material_platform.color = new THREE.Color(0xffffff)
 
 // Mesh
-const sphere = new THREE.Mesh(geometry,material)
-scene.add(sphere)
+const mesh_player = new THREE.Mesh(player,material_player)
+scene.add(mesh_player)
+mesh_player.rotateY(viewAngle)
+
+var platformPositionOffset = 0
+for (let i = 0; i < 4; i++) {
+    const mesh_platform = new THREE.Mesh(platform,material_platform)
+    scene.add(mesh_platform)
+    mesh_platform.position.x = platformPositionOffset
+    mesh_platform.position.z = -platformPositionOffset
+    mesh_platform.rotateY(viewAngle)
+    mesh_platform.position.y = -0.5
+
+    platformPositionOffset += 1.2
+}
 
 // Lights
 
@@ -61,8 +81,9 @@ window.addEventListener('resize', () =>
 // Base camera
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
 camera.position.x = 0
-camera.position.y = 0
-camera.position.z = 2
+camera.position.y = 3
+camera.position.z = 3
+camera.lookAt(0, 0, 0)
 scene.add(camera)
 
 // Controls
@@ -84,13 +105,40 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
 const clock = new THREE.Clock()
 
+// Key Listeners
+document.addEventListener("keydown", onDocumentKeyDown, false);
+function onDocumentKeyDown(event) {
+    var keyCode = event.which;
+    if (keyCode == 87) { // w
+        console.log("up")
+    } else if (keyCode == 83) { // s
+        console.log("down")
+    } else if (keyCode == 65) { // a
+        console.log("left")
+    } else if (keyCode == 68) { // d
+        console.log("right")
+    } else if (keyCode == 32) { // space
+        console.log("space")
+        mesh_player.position.x += 1.2
+        mesh_player.position.z -= 1.2
+        camera.position.x += 1.2
+        camera.position.z -= 1.2
+    } else if (keyCode == 8) { // backspace
+        console.log("backspace")
+        mesh_player.position.x -= 1.2
+        mesh_player.position.z += 1.2
+        camera.position.x -= 1.2
+        camera.position.z += 1.2
+    }
+};
+
 const tick = () =>
 {
 
     const elapsedTime = clock.getElapsedTime()
 
     // Update objects
-    sphere.rotation.y = .5 * elapsedTime
+    // sphere.rotation.y = .5 * elapsedTime
 
     // Update Orbital Controls
     // controls.update()
