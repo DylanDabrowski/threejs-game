@@ -63,26 +63,38 @@ const material_platform = new THREE.MeshBasicMaterial();
 material_platform.color = new THREE.Color(0xd4ffdc);
 material_platform.opacity = 0.0;
 
+const material_section = new THREE.MeshBasicMaterial();
+material_section.color = new THREE.Color(0xff0000);
+material_section.opacity = 0.0;
+
 // Objects
 const player = new THREE.BoxGeometry(1, 1, 1);
 const platform = new THREE.BoxGeometry(1.5, 0.2, 1.5);
+const section1 = new THREE.BoxGeometry(2, 1, 1);
 
 // Mesh
 const mesh_player = new THREE.Mesh(player, material_player);
-scene.add(mesh_player);
 mesh_player.rotateY(viewAngle);
 mesh_player.position.y = 20;
+scene.add(mesh_player);
 
 var platform_meshes = [];
 for (let i = 0; i < positions.length; i++) {
   const mesh_platform = new THREE.Mesh(platform, material_platform);
-  scene.add(mesh_platform);
   mesh_platform.position.x = positions[i].x;
   mesh_platform.position.z = positions[i].z;
   mesh_platform.rotateY(viewAngle);
   mesh_platform.position.y = -10;
+  scene.add(mesh_platform);
   platform_meshes.push(mesh_platform);
 }
+
+const mesh_section1 = new THREE.Mesh(section1, material_section);
+mesh_section1.position.x = platform_meshes[1].position.x - 3;
+mesh_section1.position.y = platform_meshes[1].position.y;
+mesh_section1.position.z = platform_meshes[1].position.z - 3;
+mesh_section1.rotateY(viewAngle);
+scene.add(mesh_section1);
 
 // Beginning Animation
 // player
@@ -116,8 +128,7 @@ function onDocumentKeyDown(event) {
   var keyCode = event.which;
   if (keyCode == 32) {
     // space
-    console.log("space");
-    if (currentPosition < positions.length) {
+    if (currentPosition < positions.length - 1) {
       currentPosition += 1;
       gsap.to(mesh_player.position, {
         duration: 1,
@@ -132,8 +143,7 @@ function onDocumentKeyDown(event) {
     }
   } else if (keyCode == 8) {
     // backspace
-    console.log("backspace");
-    if (currentPosition >= 0) {
+    if (currentPosition > 0) {
       currentPosition -= 1;
       gsap.to(mesh_player.position, {
         duration: 1,
@@ -146,6 +156,20 @@ function onDocumentKeyDown(event) {
         z: positions[currentPosition].z + 2,
       });
     }
+  }
+
+  // Show Titles if player is on certain platforms
+  if (currentPosition == 1) {
+    gsap.to(mesh_section1.position, {
+      duration: 1,
+      ease: "power2",
+      y: 1,
+    });
+    gsap.to(material_section, {
+      duration: 1,
+      ease: "power2",
+      opacity: 1.0,
+    });
   }
 }
 
