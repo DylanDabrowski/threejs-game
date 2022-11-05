@@ -261,7 +261,24 @@ function playerSpecialHop() {
       delay: 1,
     });
     isOnSpecialPlatform = true;
+    disapear();
   }
+}
+
+function disapear() {
+  for (let i = scene.children.length - 1; i >= 0; i--) {
+    if (scene.children[i].type === "Mesh")
+      gsap.to(scene.children[i].position, {
+        duration: 1.5,
+        y: -20,
+        z: "+= 20",
+        ease: "power2",
+        delay: 2,
+      });
+  }
+  setTimeout(function () {
+    console.log("going to new page");
+  }, 3000);
 }
 
 // Update When Window Resizes
@@ -286,5 +303,11 @@ const tick = () => {
   // Call tick again on the next frame
   window.requestAnimationFrame(tick);
 };
+
+function clearScene() {
+  while (scene.children.length > 0) {
+    scene.remove(scene.children[0]);
+  }
+}
 
 tick();
