@@ -4,7 +4,7 @@ import * as dat from "dat.gui";
 import { gsap } from "gsap";
 import { Vector3 } from "three";
 
-// Platform Positions
+// Variables
 const gap = 1.5;
 var positions = [
   new Vector3(0, 0, 0),
@@ -14,6 +14,7 @@ var positions = [
 ];
 const viewAngle = 0.8;
 var currentPosition = 0;
+var isOnSpecialPlatform = false;
 
 // Sizes
 const sizes = {
@@ -166,10 +167,23 @@ gsap.to(material_special_platform, {
 document.addEventListener("keydown", onDocumentKeyDown, false);
 function onDocumentKeyDown(event) {
   var keyCode = event.which;
+  if (keyCode == 13) {
+    // enter
+    if (
+      platform_meshes[special_platforms[0]].position.x == mesh_player.position.x
+    ) {
+      playerSpecialHop();
+    } else if (
+      platform_meshes[special_platforms[1]].position.x == mesh_player.position.x
+    ) {
+      playerSpecialHop();
+    }
+  }
   if (keyCode == 32) {
     // space
     if (currentPosition < positions.length - 1) {
       currentPosition += 1;
+      playerHop();
       gsap.to(mesh_player.position, {
         duration: 1,
         x: positions[currentPosition].x,
@@ -185,6 +199,7 @@ function onDocumentKeyDown(event) {
     // backspace
     if (currentPosition > 0) {
       currentPosition -= 1;
+      playerHop();
       gsap.to(mesh_player.position, {
         duration: 1,
         x: positions[currentPosition].x,
@@ -195,6 +210,7 @@ function onDocumentKeyDown(event) {
         x: positions[currentPosition].x,
         z: positions[currentPosition].z + 2,
       });
+      isOnSpecialPlatform = false;
     }
   }
 
@@ -212,6 +228,39 @@ function onDocumentKeyDown(event) {
         opacity: 1.0,
       });
     }
+  }
+}
+
+function playerHop() {
+  gsap.to(mesh_player.position, {
+    duration: 1,
+    y: 0.5,
+    ease: "power2",
+  });
+  gsap.to(mesh_player.position, {
+    duration: 0.5,
+    y: 0,
+    ease: "power2",
+    delay: 0.5,
+  });
+}
+
+function playerSpecialHop() {
+  if (!isOnSpecialPlatform) {
+    gsap.to(mesh_player.position, {
+      duration: 1.5,
+      x: "-=1.5",
+      y: 0.8,
+      z: "-= 1.5",
+      ease: "power2",
+    });
+    gsap.to(mesh_player.position, {
+      duration: 0.5,
+      y: 0,
+      ease: "power2",
+      delay: 1,
+    });
+    isOnSpecialPlatform = true;
   }
 }
 
